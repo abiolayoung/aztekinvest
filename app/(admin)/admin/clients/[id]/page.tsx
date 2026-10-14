@@ -6,6 +6,7 @@ import { Money, PageIntro } from "@/components/ui/page";
 import { can } from "@/lib/auth/permissions";
 import { requireUser } from "@/lib/auth/session";
 import { mapSummary } from "@/lib/data/summary";
+import { findPlan, totalPercent } from "@/lib/plans";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,6 +14,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   if (!can(profile.role, "viewClients")) return <p>You do not have permission to view clients.</p>;
   const { data: client } = await supabase.from("profiles").select("*").eq("id", id).eq("role", "client").maybeSingle();
   if (!client) notFound();
+  const plan = findPlan(client.selected_plan);
   const summaryResult = await supabase.rpc("get_account_summary", { target_user: client.id });
   const summaryRow = Array.isArray(summaryResult.data) ? summaryResult.data[0] : summaryResult.data;
   const summary = summaryRow ? mapSummary(summaryRow) : null;
@@ -24,6 +26,16 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   return (
     <div>
       <PageIntro title={client.full_name || "Client"} body={`${client.verification_status} · ${client.account_status}`} />
+      <p className="mb-4 text-sm">
+        Plan:{" "}
+        {plan ? (
+          <span className="font-medium">
+            {plan.name} ({totalPercent(plan)}% in {plan.durationDays} days)
+          </span>
+        ) : (
+          <span className="text-ink-muted">Not selected</span>
+        )}
+      </p>
       {summary ? (
         <p className="mb-4 text-sm">Cash <Money cents={summary.cashCents} /> · Reserved <Money cents={summary.reservedCents} /> · Holdings <Money cents={summary.holdingsValueCents} /> · Confirmed deposits <Money cents={summary.confirmedDepositsCents} /></p>
       ) : <p className="mb-4 text-sm text-danger">Balances could not be loaded.</p>}

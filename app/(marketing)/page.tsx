@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { PlanTrigger } from "@/components/plans/plan-trigger";
+import { PricingSection } from "@/components/plans/pricing-section";
 
 export const metadata: Metadata = { title: "A clearer view of your investments" };
 
@@ -22,9 +24,9 @@ export default function HomePage() {
             Aztek combines research-driven investment management with transparent account reporting, giving you a clear view of your deposits, managed portfolio, and account activity.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/register" className="rounded-lg bg-brand px-4 py-3 text-sm text-white hover:bg-brand-hover">
-              Create your account
-            </Link>
+            <PlanTrigger className="rounded-lg bg-brand px-4 py-3 text-sm text-white hover:bg-brand-hover">
+              View plans & sign up
+            </PlanTrigger>
             <Link href="/how-it-works" className="rounded-lg border border-line bg-white px-4 py-3 text-sm text-ink hover:bg-muted">
               How it works
             </Link>
@@ -47,7 +49,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-content gap-4 px-5 pb-16 md:grid-cols-2">
+      <PricingSection />
+
+      <section className="mx-auto grid max-w-content gap-4 px-5 py-16 md:grid-cols-2">
         {[
           ["Managed by an investment team", "Authorized Aztek personnel manage investment execution. Clients monitor their accounts. The portal does not provide trading controls."],
           ["A simple way to fund your account", "When a cryptocurrency and network have been configured, you can request a deposit, follow the payment instructions, and submit a transaction hash for review."],

@@ -3,17 +3,20 @@ import Link from "next/link";
 import { registerAction } from "@/lib/actions/auth";
 import { countries } from "@/lib/constants/countries";
 import { StateForm } from "@/components/forms/state-form";
+import { PlanField } from "@/components/plans/plan-field";
 import { Input, Label, Select } from "@/components/ui/fields";
 
 export const metadata: Metadata = { title: "Create account" };
 
-export default function RegisterPage() {
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
+  const { plan } = await searchParams;
   return (
     <div>
       <h1 className="text-2xl font-medium">Create account</h1>
-      <p className="mt-1 text-sm text-ink-muted">Registration creates a client profile. It cannot grant administrator access.</p>
+      <p className="mt-1 text-sm text-ink-muted">Choose your investment plan, then create your client profile.</p>
       <div className="mt-6">
         <StateForm action={registerAction} submitLabel="Create account" pendingLabel="Creating account...">
+          <PlanField initialPlanId={plan} />
           <div>
             <Label htmlFor="fullName">Full legal name</Label>
             <Input id="fullName" name="fullName" autoComplete="name" required />

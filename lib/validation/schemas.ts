@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { parseUsdToCents } from "@/lib/finance/money";
 import { destinationAddressError, transactionHashError } from "@/lib/security/sensitive";
+import { planIds } from "@/lib/plans";
 
 export const passwordSchema = z
   .string()
@@ -17,6 +18,7 @@ export const registerSchema = z
     password: passwordSchema,
     confirmPassword: z.string(),
     countryCode: z.string().regex(/^[A-Z]{2}$/, "Choose your country of residence."),
+    planId: z.enum(planIds, { errorMap: () => ({ message: "Choose an investment plan to continue." }) }),
     acceptTerms: z.literal(true, {
       errorMap: () => ({ message: "Accept the terms and privacy notice to continue." }),
     }),

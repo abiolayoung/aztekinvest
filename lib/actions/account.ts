@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
+import { findPlan } from "@/lib/plans";
 import { publicDbError } from "@/lib/security/errors";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { profileSchema } from "@/lib/validation/schemas";
 
 export type ActionState = { error?: string; message?: string };
@@ -27,6 +29,22 @@ export async function updateProfileAction(_state: ActionState, formData: FormDat
   revalidatePath("/dashboard/profile");
   revalidatePath("/onboarding");
   return { message: "Profile saved." };
+}
+
+export async function updatePlanAction(planId: string): Promise<ActionState> {
+  const plan = findPlan(planId);
+  if (!plan) return { error: "Choose a valid investment plan." };
+  const { user, profile } = await requireUser();
+  if (profile.role !== "client") return { error: "Only client accounts have an investment plan." };
+  const admin = createAdminClient();
+  if (!admin) return { error: "Account services are not configured yet." };
+  const { error } = await admin
+    .from("profiles")
+    .update({ selected_plan: plan.id, selected_plan_at: new Date().toISOString() })
+    .eq("id", user.id);
+  if (error) return { error: publicDbError(error, "Your plan could not be updated.") };
+  revalidatePath("/dashboard");
+  return { message: `Your plan is now ${plan.name}.` };
 }
 
 export async function acknowledgeWelcomeAction(_state: ActionState, _formData: FormData): Promise<ActionState> {

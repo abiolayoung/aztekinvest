@@ -8,6 +8,8 @@ import { mapSummary, type AccountSummary } from "@/lib/data/summary";
 import { formatTimestamp } from "@/lib/format/date";
 import { categoryLabel, labelFor, ledgerTypeLabel } from "@/lib/format/labels";
 import { toCents } from "@/lib/finance/money";
+import { ChangePlanButton } from "@/components/plans/change-plan-button";
+import { depositRangeLabel, findPlan, totalPercent } from "@/lib/plans";
 import type { ExternalFlow, PerformancePoint } from "@/lib/finance/performance";
 
 export default async function DashboardPage() {
@@ -50,6 +52,7 @@ export default async function DashboardPage() {
   ];
   const funded = summary.cashCents > 0n || summary.confirmedDepositsCents > 0n || summary.activeHoldings > 0;
   const hasWelcomeBonus = (transactions.data ?? []).some((row) => row.transaction_type === "signup_bonus");
+  const plan = findPlan(profile.selected_plan);
 
   return (
     <div>
@@ -63,6 +66,44 @@ export default async function DashboardPage() {
           <Link href="/dashboard/portfolio" className="rounded-lg border border-line bg-white px-4 py-2.5 text-sm">View portfolio</Link>
         </div>
       </div>
+      {plan ? (
+        <div className="relative mb-6 overflow-hidden rounded-card bg-gradient-to-br from-[#0E2F27] via-brand to-[#1F5A4A] px-5 py-5 text-white">
+          <div className="pointer-events-none absolute -right-10 -top-16 h-44 w-44 rounded-full bg-brand-gold/20 blur-3xl" />
+          <div className="relative flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">Your plan</p>
+              <p className="mt-1 text-lg font-medium">
+                {plan.name} · <span className="numeric">{totalPercent(plan)}%</span> in {plan.durationDays} days
+              </p>
+              <p className="mt-0.5 text-xs text-white/75">
+                {plan.dailyPercent}% daily · {depositRangeLabel(plan)}
+                {plan.capitalReturned ? " · capital returned" : ""} · {plan.referralCommissionPercent}% referral commission
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <ChangePlanButton
+                currentPlanId={plan.id}
+                className="rounded-lg border border-white/30 px-4 py-2.5 text-sm text-white transition hover:bg-white/10 disabled:opacity-60"
+              >
+                Change plan
+              </ChangePlanButton>
+              <Link href="/dashboard/deposit" className="rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-brand">
+                Fund this plan
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : profile.role === "client" ? (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-card border border-dashed border-brand/40 bg-white px-5 py-4">
+          <div>
+            <p className="text-sm font-medium">You have not chosen an investment plan yet</p>
+            <p className="mt-0.5 text-xs text-ink-muted">Compare the plans and pick the one that fits your deposit.</p>
+          </div>
+          <ChangePlanButton className="rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60">
+            Choose a plan
+          </ChangePlanButton>
+        </div>
+      ) : null}
       {hasWelcomeBonus ? (
         <div className="mb-6 rounded-card border border-line bg-white px-4 py-3 text-sm">
           Your <span className="font-medium">$100.00 welcome bonus</span> is included in available cash. Deposits still require administrator verification before they are credited.

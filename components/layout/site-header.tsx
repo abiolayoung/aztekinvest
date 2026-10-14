@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Wordmark } from "@/components/brand/wordmark";
 
 const links = [
+  ["Plans", "/plans"],
   ["About", "/about"],
   ["How it works", "/how-it-works"],
   ["Investment approach", "/investment-approach"],

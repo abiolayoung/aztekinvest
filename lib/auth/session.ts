@@ -17,6 +17,8 @@ export type Profile = {
   notification_preferences: { email?: boolean; in_app?: boolean };
   onboarding_welcome_at: string | null;
   onboarding_completed_at: string | null;
+  selected_plan: string | null;
+  selected_plan_at: string | null;
 };
 
 export async function getSession() {

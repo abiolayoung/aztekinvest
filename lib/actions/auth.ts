@@ -46,9 +46,13 @@ function authSignupError(error: { message?: string; code?: string; status?: numb
   return publicDbError(error, "The account could not be created.");
 }
 
-async function finalizeNewClient(userId: string) {
+async function finalizeNewClient(userId: string, planId: string) {
   const admin = createAdminClient();
   if (!admin) return;
+  await admin
+    .from("profiles")
+    .update({ selected_plan: planId, selected_plan_at: new Date().toISOString() })
+    .eq("id", userId);
   // Best-effort welcome bonus. Never fail registration if this lags.
   await admin.rpc("grant_signup_bonus", { target_user: userId });
   // Emails must not block the signup redirect (Resend latency / rate limits).
@@ -64,6 +68,7 @@ export async function registerAction(_state: ActionState, formData: FormData): P
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
     countryCode: formData.get("countryCode"),
+    planId: formData.get("planId"),
     acceptTerms: formData.get("acceptTerms") === "on",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check the form and try again." };
@@ -77,12 +82,13 @@ export async function registerAction(_state: ActionState, formData: FormData): P
       user_metadata: {
         full_name: parsed.data.fullName,
         country_code: parsed.data.countryCode,
+        investment_plan: parsed.data.planId,
       },
     });
     if (createError) return { error: authSignupError(createError) };
     if (!created.user) return { error: "The account could not be created." };
 
-    await finalizeNewClient(created.user.id);
+    await finalizeNewClient(created.user.id, parsed.data.planId);
 
     const supabase = await createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -104,11 +110,12 @@ export async function registerAction(_state: ActionState, formData: FormData): P
       data: {
         full_name: parsed.data.fullName,
         country_code: parsed.data.countryCode,
+        investment_plan: parsed.data.planId,
       },
     },
   });
   if (error) return { error: authSignupError(error) };
-  if (data.user) await finalizeNewClient(data.user.id);
+  if (data.user) await finalizeNewClient(data.user.id, parsed.data.planId);
   if (!data.session) {
     redirect("/register/check-email");
   }
