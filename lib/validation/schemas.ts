@@ -15,6 +15,11 @@ export const registerSchema = z
   .object({
     fullName: z.string().trim().min(2, "Enter your full legal name.").max(120),
     email: z.string().trim().email("Enter a valid email address."),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^\+?[0-9 ()-]{7,32}$/, "Enter a valid phone number, including your country code.")
+      .refine((value) => value.replace(/\D/g, "").length >= 7, "Enter a valid phone number, including your country code."),
     password: passwordSchema,
     confirmPassword: z.string(),
     countryCode: z.string().regex(/^[A-Z]{2}$/, "Choose your country of residence."),

@@ -10,7 +10,7 @@ const email = process.argv[2];
   const client = new Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
   await client.connect();
   const { rows } = await client.query(
-    "select p.id, u.email, p.selected_plan, p.selected_plan_at from public.profiles p join auth.users u on u.id = p.id where u.email = $1",
+    "select p.id, u.email, p.phone, p.selected_plan, p.selected_plan_at from public.profiles p join auth.users u on u.id = p.id where u.email = $1",
     [email],
   );
   console.log(rows);

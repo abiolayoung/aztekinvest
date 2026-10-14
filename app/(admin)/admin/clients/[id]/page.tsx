@@ -35,6 +35,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         ) : (
           <span className="text-ink-muted">Not selected</span>
         )}
+        {" · "}Phone:{" "}
+        {client.phone ? (
+          <a href={`tel:${client.phone.replace(/[^\d+]/g, "")}`} className="font-medium text-brand hover:underline">
+            {client.phone}
+          </a>
+        ) : (
+          <span className="text-ink-muted">Not provided</span>
+        )}
       </p>
       {summary ? (
         <p className="mb-4 text-sm">Cash <Money cents={summary.cashCents} /> · Reserved <Money cents={summary.reservedCents} /> · Holdings <Money cents={summary.holdingsValueCents} /> · Confirmed deposits <Money cents={summary.confirmedDepositsCents} /></p>

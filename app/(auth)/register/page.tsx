@@ -26,6 +26,11 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
             <Input id="email" name="email" type="email" autoComplete="email" required />
           </div>
           <div>
+            <Label htmlFor="phone">Phone number</Label>
+            <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="+1 555 123 4567" required />
+            <p className="mt-1 text-xs text-ink-muted">Include your country code so our support team can reach you.</p>
+          </div>
+          <div>
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" autoComplete="new-password" required />
             <p className="mt-1 text-xs text-ink-muted">At least 12 characters, with upper and lower case, a number, and a symbol.</p>
